@@ -1,0 +1,240 @@
+---
+title: "STAA57 W21 - Project Proposal"
+author:  "Group 11 (Alice Huang, Dominic Ma, Jalal Kassab, Vanshika Virmani)"
+output:
+  pdf_document:
+    df_print: paged
+urlcolor: blue
+---
+***
+
+This is a draft file which I used for testing things out. Final report is in the file
+labelled Proposal_Template_FINAL.Rmd
+
+Link to the share RStudio Cloud project that created this report: e.g.  
+https://rstudio.cloud/spaces/115177/project/2132391 (where XYZ is the project #)       
+
+#### Analysis Plan 
+
+1. Specify the questions you will address. Describe the general topic of your investigation, and state specific questions you will address. Include any relevant information.
+
+2. Specify your data analysis plan. Describe (in words) how you will address these questions using data.
+
+3. Specify your data sources, and the type of information you will use (for external data, provide links/references). For each data source, describe the variables and observations used in your analysis. Identify any potential issues (e.g. bias). 
+
+4. Provide the R code that imports the data into R, and formats them appropriately (this can go to the appendix if it is too lengthy). Submit a copy of your external data files, if any. 
+#### Data 
+```{r, include=FALSE, warning=FALSE}
+source(file = "preprocess_data.R")
+library(tidyverse)
+```
+
+#### Preliminary Results
+
+5. Create at least three data summaries/visualisations which are relevant to your questions, and comment on your results. 
+
+```{r}
+clean_data %>%
+  select(Student_ID, Aircraft, Duration) %>%
+  group_by(Student_ID, Aircraft) %>%
+  summarize( total_time = sum(Duration)) -> aircraft_time_data
+
+aircraft_time_data
+
+aircraft_time_data %>%
+  ggplot(aes(x = Student_ID, y = total_time, fill = Aircraft)) + geom_bar(stat = "identity", position = "stack")
+```
+
+
+```{r}
+clean_data %>%
+  select(Student_ID, Duration, Training_Type) %>%
+  group_by(Student_ID, Training_Type) %>%
+  summarize(total_training_time = sum(Duration)) -> solo_dual_data
+
+solo_dual_data
+
+solo_dual_data %>% ggplot(aes(x=Student_ID, y=total_training_time, fill=Training_Type)) + geom_bar(stat = "identity")
+```
+
+```{r}
+clean_data %>% select(Aircraft, Duration, Training_Type) %>%
+  group_by(Aircraft) %>%
+  summarize(total_time_aircraft = sum(Duration))
+
+clean_data %>% ggplot(aes(x = Aircraft, y = Duration, fill = Training_Type)) + geom_bar(stat="identity")
+```
+```{r}
+
+planecosts = read_csv("/cloud/project/data/planescosts.csv")
+planecosts
+```
+
+
+
+```{r}
+clean_data %>% select(Student_ID) %>%
+  summarize(Student_ID, Duration, total_hours = sum(Duration)) -> students2
+
+students2
+
+clean_data %>% filter(Training_Type == "CC_solo"| Training_Type == "LF_solo") %>%
+  distinct(Student_ID) -> solo_students
+
+solo_students
+
+solo_students %>% ggplot(aes(x= Student_ID))
+```
+
+```{r}
+# count how many times student 4 finished a different exercise
+
+clean_data %>% select(Student_ID, Exercises) %>%
+  filter(Student_ID == 4) -> student_4_ex
+
+student_4_ex
+
+student_4_ex %>% count("23")
+```
+
+```{r}
+#This is a function that computes the fuel cost for an aircraft given its model (one of C-172, C-152, C-150)
+# and the number of hours it flew (hours)
+planecosts %>% filter(Aircraft == "C-172") %>% select(Fuel_Cost_Per_Hour) -> hourly_cost_c172
+planecosts %>% filter(Aircraft == "C-152") %>% select(Fuel_Cost_Per_Hour) -> hourly_cost_c152
+planecosts %>% filter(Aircraft == "C-150") %>% select(Fuel_Cost_Per_Hour) -> hourly_cost_c150
+
+fuel_cost = function(plane, hours){
+  result = NA
+  if(plane == "C-172"){
+    result = hours*hourly_cost_c172[[1]]
+  } 
+  else if(plane == "C-152"){
+    result = hours*hourly_cost_c152[[1]]
+  } 
+  else if(plane == "C-150"){
+    result = hours*hourly_cost_c150[[1]]
+  }
+  return(result)
+}
+```
+
+```{r}
+clean_data %>% left_join(planecosts, by="Aircraft") %>%
+  mutate(Fuel_Cost_Gallons_Session = Duration*Fuel_Cost_Per_Hour) -> clean_data_withcosts
+
+clean_data_withcosts %>% group_by(Aircraft) %>%
+  summarise(total_costs = sum(Fuel_Cost_Gallons_Session)) %>%
+  ggplot(aes(x = Aircraft, y = total_costs)) + geom_bar(stat = "identity")
+```
+```{r , echo = FALSE, warning=FALSE}
+clean_data %>%
+  select(Student_ID, Duration, Training_Type) %>%
+  group_by(Student_ID, Training_Type) %>%
+  summarize(total_training_time = sum(Duration)) -> solo_dual_data
+
+solo_dual_data
+
+solo_dual_data %>% ggplot(aes(x=Student_ID, y=total_training_time, fill=Training_Type)) + geom_bar(stat = "identity")
+```
+
+
+```{r , echo = FALSE, warning=FALSE}
+clean_data %>% select(Aircraft, Duration, Training_Type) %>%
+  group_by(Aircraft) %>%
+  summarize(total_time_aircraft = sum(Duration))
+
+clean_data %>% ggplot(aes(x = Aircraft, y = Duration, fill = Training_Type)) + geom_bar(stat="identity")
+clean_data %>% ggplot(aes(x = Aircraft, y = Duration, fill = Training_Type)) + geom_bar(stat="identity") + facet_wrap(Year~., scales = "free") + theme(legend.position = "bottom")
+```
+
+*************************
+```{r}
+my_clean_data %>% filter(Student_ID %in% c(1,6,54,121,41,8,79,87,93,44,4,91,27)) %>%
+  mutate(New_Duration = ifelse(is.na(Duration), 0, Duration)) %>%
+  group_by(Student_ID) %>%
+  summarize(sum(New_Duration))
+```
+
+WARNING: does not account for issue with GROUND school students!!
+```{r}
+clean_data%>%
+  filter(Aircraft == "C-152"|| "C-172")%>%
+  mutate(Revenue = ifelse(Aircraft =="C-152", 135*ceiling(Duration), 155*ceiling(Duration)))%>%
+  mutate(Instructor_costs = ifelse(Training_Type == "LF_dual"|Aircraft == "GROUND", Duration*65, 0)) %>% 
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year) %>%
+  summarize(total_revenue_per_month = sum(Revenue)) %>% 
+  ggplot(aes(x = factor(Month_Year), y = total_revenue_per_month, fill = Month_Year)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(legend.position = "none") + ggtitle("Year_Month vs Monthly Revenue") + ylab("Monthly Revenue ($CAD)") + xlab("Year - Month")
+```
+
+**********************************************
+*********************************************
+
+## Monthly Revenue Code
+
+```{r}
+hourly_c150c152_rental_rate = 135
+hourly_c172_rental_rate = 155
+
+my_cd%>%
+  filter(Aircraft %in% c("C-152", "C-172", "C-150"))%>%
+  mutate(Revenue_Session = ifelse(Aircraft =="C-172", hourly_c172_rental_rate*ceiling(Duration), hourly_c150c152_rental_rate*ceiling(Duration)))%>%
+  mutate(Instructor_costs = ifelse(Training_Type == "LF_dual"|Aircraft == "GROUND", Duration*65, 0)) %>%
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year) %>%
+  summarize(total_revenue_per_month = sum(Revenue_Session)) -> lower_bound_month_revenue
+
+(lower_bound_month_revenue %>% mutate(Lower_or_Upper = "Lower") -> lower_bound_month_revenue)
+
+# ggplot(aes(x = factor(Month_Year), y = total_revenue_per_month, fill = Month_Year)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(legend.position = "none") + ggtitle("Year_Month vs Monthly Revenue") + ylab("Monthly Revenue ($CAD)") + xlab("Year - Month")
+```
+```{r}
+# cost for ground session
+
+package_5hr_revenue = 1575
+c172_package_upgrade = 100
+
+(ground_revenue5hr = package_5hr_revenue - 5*hourly_c150c152_rental_rate)
+
+package_10hr_revenue = 2575
+
+(ground_revenue10hr = package_10hr_revenue - 10*hourly_c150c152_rental_rate)
+```
+
+
+```{r}
+my_cd%>%
+  filter(Aircraft %in% c("C-152", "C-172", "C-150", "GROUND"))%>%
+  mutate(Revenue_Session2 = ifelse(Aircraft =="C-172", hourly_c172_rental_rate*ceiling(Duration), ifelse(Aircraft=="GROUND", ground_revenue10hr, hourly_c150c152_rental_rate*ceiling(Duration))))%>%
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year) %>%
+  summarize(total_revenue_per_month = sum(Revenue_Session2)) -> upper_bound_month_revenue
+
+(upper_bound_month_revenue %>% mutate(Lower_or_Upper = "Upper") -> upper_bound_month_revenue)
+```
+
+```{r}
+bind_rows(lower_bound_month_revenue, upper_bound_month_revenue) -> monthly_revenue_both
+monthly_revenue_both
+```
+
+```{r message=FALSE, warning=FALSE}
+ggplot(monthly_revenue_both, aes(x=Month_Year, y = total_revenue_per_month)) + geom_bar(stat = "identity") + facet_grid(.~ Lower_or_Upper) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(legend.position = "none") + ggtitle("Year_Month vs Monthly Revenue") + ylab("Monthly Revenue ($CAD)") + xlab("Year - Month")
+```
+
+## Monthly Fuel Costs
+
+````{r , echo = FALSE, warning=FALSE}
+my_cd %>% mutate(Gallons_Fuel_Session = ifelse(Aircraft == "C-172", 8.4*Duration, 
+                                                             ifelse(Aircraft == "C-152", 6.1*Duration, 5.6*Duration))) %>%
+  mutate(Price_Fuel_Session = Gallons_Fuel_Session*(0.01/0.2199692)) %>%
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year) %>%
+  summarize(total_monthly_fuel = sum(Price_Fuel_Session)) %>%
+  ggplot(aes(x = Month_Year, y = total_monthly_fuel)) + geom_bar(stat = "identity") + theme(legend.position = "bottom")  + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Monthly Costs of Fuel for Years 2018-2020") + ylab("Monthly Fuel Cost ($CAD)")
+```

@@ -1,0 +1,273 @@
+---
+title: "STAA57 W21 Project Description"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    df_print: paged
+urlcolor: blue
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Project Client 
+
+Our client is [Durham Flight Center](https://durhamflightcentre.com/) (DFC), a flight training unit registered with Transport Canada and operating out of Oshawa Executive Airport (ICAO: CYOO). DFC offers training for Private/Commercial Pilot Licences (PPL/CPL) and they have provided us with data on their training sessions.
+
+
+### Project Data
+
+The data consist of several years' worth of training records, including:   
+
+- Instructor & Student ID
+- Date and Duration of training session
+- Type of equipement (aircraft type/simulator)
+- Type of session (local/cross-country, solo/dual flight)
+- Exercises completed (set of exercises performed)
+
+
+### Project Question
+
+Your goal for the  course project is to:
+
+> *Discover interesting patterns in the data and suggest ways to improve training*
+
+This is a purposefully open-ended question which you can be approached in different ways. Note that you are not required to look at it from every possible angle,  you should rather focus on one or more *specific aspects* of the question that can be addressed with the help of data. For example, you can try to identify factors for successful/complete training, training patterns that can help in scheduling, or forecast future training demand. More generally, you can look for interesting spatial, temporal, or other types of patterns in the data that can suggest improvements.
+
+
+### Additional Data Sources
+The provided data can be complemented with additional information to address various aspects of the project. To answer specific questions, you might have to locate and make use of additional data. There are several open data sources available to you, such as:  
+
+-  [Aircraft movements, by civil and military movements, airports with NAV CANADA towers, monthly](https://open.canada.ca/data/en/dataset/b91772ed-edae-4fd4-8b80-a3e4c1d29976) 
+- [Canadian airports served by NAV CANADA control towers or flight service station](https://open.canada.ca/data/en/dataset/3a1eb6ef-6054-4f9d-b1f6-c30322cd7abf)
+-  [Civil Aircraft Register Database](https://open.canada.ca/data/en/dataset/935cf4d3-7e8d-4e9b-8dfd-c02643d4f782)
+-  [Cost of Parts, Repair, and Overhaul per Hour of Flight on Selected Aircraft 2006-2016](https://open.canada.ca/data/en/dataset/deb7066b-c94b-4f65-a4e3-6b99ff47a3e0)  
+
+Note: You can read up on these and other data sources to  identify the types of information that is available and come up with meaningful ways to use it. 
+
+
+### Milestones
+There are three milestones and associated deliverables for the project: a proposal, a draft, and a final report & presentation. 
+You will be provided with templates and assessment rubrics for each deliverable. 
+
+#####	Proposal
+The proposal must specify the selected research questions and data used to answer them, outline your analysis plan, and provide a preliminary exploration of the data. The purpose of the proposal is to ensure that you have thought about the problem, identified the questions you want to address, and assessed the feasibility of your approach. Moreover, it is an opportunity to received feedback and guidance on the project. The proposal will be a short document (up to 5 pages) *due on Friday February 19*, and is worth 20\% of the project marks.
+
+
+##### Draft Report
+The draft report should contain the bulk of your analysis, and it must clearly describe your approach, results, and conclusions.  Again, the main purpose is to make sure you are on track and you have an opportunity to receive feedback and make improvements before the final report.    
+The draft will be a technical report (no more than 10 pages) *due on March 26*, and is worth 20\% of the project marks.
+
+
+##### Final Report & Presentation 
+The last deliverables are the final version of your report and a 5-minute pitch (up to 5 slides) that you will deliver to our client. You will also have to submit the full code that  reproduces your results. 
+The final report & presentation are *due on April 9*, and is worth 60\% of the project marks.
+
+
+### Teamwork
+The project will be completed in randomly assigned teams of up to 4 students. There will be a survey at the end of the project, where each student will evaluate their teammates and assess their contribution. The final project marks for each student will be determined by the team project marks, adjusted by an individual contribution factor based on the survey. 
+
+#### Acknowledgement
+Many thanks to Rob Thomson, Dispatch Manager at DFC, for providing the project data.
+
+```{r}
+library(tidyverse)
+clean_data
+```
+
+
+```{r}
+clean_data %>%
+  select(Student_ID, Aircraft, Duration, Instructor_ID) %>%
+  mutate(C152 = str_detect(
+  ))
+  group_by(Student_ID, Aircraft) %>%
+  summarize( total_time = sum(Duration)) %>%
+  ggplot(aes(x = factor(Student_ID), y = total_time, fill = Aircraft)) + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  
+```
+
+
+
+```{r}
+clean_data %>%
+  select(Student_ID, Aircraft, Duration, Instructor_ID, Training_Type) %>%
+  mutate(solo = str_detect(Training_Type, "solo")) %>%
+  group_by(Student_ID, Aircraft) %>%
+  summarize( successful = sum(solo), total_time = sum(Duration)) %>%
+  filter(successful == 0) %>%
+  ggplot(aes(x = factor(Student_ID), y = total_time, fill = Aircraft)) + geom_bar(stat = "identity") + theme(axis.text.x = element_blank()) + xlab("Student ID")
+#+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+```{r}
+clean_data %>%
+  select(Student_ID, Aircraft, Duration, Instructor_ID, Training_Type, Year) %>%
+  mutate(solo = str_detect(Training_Type, "solo")) %>%
+  filter(Year >= 2018) %>%
+  group_by(Student_ID, Aircraft) %>%
+  summarize( successful = sum(solo), total_time = sum(Duration)) %>%
+  filter(successful > 0) %>%
+  ggplot(aes(x = factor(Student_ID), y = total_time, fill = Aircraft)) + geom_bar(stat = "identity") + theme(axis.text.x = element_blank()) + xlab("Student ID")
+
+#+ theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+```{r}
+clean_data %>%
+  select(Student_ID, Aircraft, Duration, Instructor_ID, Training_Type, Year) %>%
+  mutate(solo = str_detect(Training_Type, "solo")) %>%
+  filter(Year >= 2018) %>%
+  group_by(Student_ID, Aircraft) %>%
+  summarize( successful = sum(solo), total_time = sum(Duration)) %>%
+  filter(successful > 0) %>%
+  ggplot(aes(x = factor(Student_ID), y = total_time, fill = Aircraft)) + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+clean_data %>% select(Aircraft, Duration, Training_Type, Month, Year) %>%
+  filter( Month <= 12) %>%
+  filter(Year == 2018) %>%
+  group_by(Aircraft, Month, Year) %>%
+  summarize(total_time_per_month = sum(Duration)) %>%
+  ggplot(aes(x = factor(Month), y = total_time_per_month, fill = factor(Month))) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Months in 2018 vs Duration of Flight Hours") + scale_fill_discrete(name = "Months",
+labels = c("January", "February", "March" ,"April", "May", "June", "July", "August", "September", "October", "November"))
+
+```
+
+```{r}
+```
+
+
+
+```{r}
+
+clean_data %>% select(Aircraft, Duration, Training_Type, Month, Year) %>%
+  filter(Aircraft == "C-152") %>%
+  filter(Year> 2010) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  #filter(Year == "2019") %>%
+  group_by(Month_Year) %>%
+  summarize(total_time_per_month = sum(Duration)) %>%
+  ggplot(aes(x = factor(as.Date(Month_Year)), y = total_time_per_month, fill = Month_Year)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme(legend.position = "none")
+  
+```
+
+
+```{r}
+my_clean_data <- clean_data %>% 
+  distinct( Session_ID, .keep_all = T) %>% 
+  mutate(Exercises = str_split(Exercises, ","))
+
+Student1 <- filter(my_clean_data, Student_ID ==1)
+Student1.exercise_dist <- table(flatten_chr(Student1$Exercises))
+Student1.exercise_dist <- Student1.exercise_dist[order(as.numeric(names(Student1.exercise_dist)))]
+barplot(Student1.exercise_dist, main= "Student 1: No. Times Completed Each Exercise", las = 1, cex.names = 0.8, horiz = TRUE, col = rainbow(40), ylim=c(0,30), xlim = c(0,30))
+```
+
+```{r}
+ground = clean_data%>%
+  filter(Aircraft == "GROUND") %>%
+  select(Exercises)
+
+avg = clean_data %>%
+  inner_join(ground, by = "Exercises") %>%
+  drop_na() %>%
+  group_by(Exercises) %>%
+  summarise(Ground_Exercises_Duration = mean(Duration))
+
+instructor_cost = clean_data %>%
+  left_join(avg, by = "Exercises") %>%
+   filter(Year >= 2018) %>%
+  mutate(New_Duration = ifelse(Aircraft == "GROUND", Ground_Exercises_Duration, Duration)) %>%
+    #drop_na() %>%
+  mutate(Instructor_Cost = 65 * New_Duration) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year, Aircraft) %>%
+  summarize(instructor_cost_per_month = sum(Instructor_Cost)) %>%
+  ggplot(aes(x = factor(Month_Year), y = instructor_cost_per_month, fill = Aircraft)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + #theme(legend.position = "none") + 
+  ggtitle("Year_Month vs Monthly Instructor Cost") + ylab("Monthly Instructor Cost ($CAD)") + xlab("Year - Month")
+```
+
+```{r}
+
+# cost for ground session
+
+hourly_c150c152_rental_rate = 135
+hourly_c172_rental_rate = 155
+
+package_5hr_revenue = 1575
+
+(ground_revenue5hr = package_5hr_revenue - 5*hourly_c150c152_rental_rate)
+
+package_10hr_revenue = 2575
+
+(ground_revenue10hr = package_10hr_revenue - 10*hourly_c150c152_rental_rate)
+
+my_cd%>%
+  filter(Aircraft %in% c("C-152", "C-172", "C-150", "GROUND"))%>%
+  mutate(Revenue_Session = ifelse(Aircraft =="C-172", hourly_c172_rental_rate*ceiling(Duration), ifelse(Aircraft=="GROUND", ground_revenue10hr, hourly_c150c152_rental_rate*ceiling(Duration))))%>%
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year, Aircraft) %>%
+  summarize(total_revenue_per_month = sum(Revenue_Session)) -> upper_bound_month_revenue
+
+(upper_bound_month_revenue %>% mutate(Lower_or_Upper = "Upper") -> upper_bound_month_revenue) 
+
+```
+```{r}
+instructor_cost = clean_data %>%
+  left_join(avg, by = "Exercises") %>%
+   filter(Year >= 2018) %>%
+  mutate(New_Duration = ifelse(Aircraft == "GROUND", Ground_Exercises_Duration, Duration)) %>%
+    #drop_na() %>%
+  mutate(Instructor_Cost = 65 * New_Duration) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year, Aircraft) %>%
+  summarize(instructor_cost_per_month = sum(Instructor_Cost))
+
+cost1 = instructor_cost %>%
+  inner_join(upper_bound_month_revenue, by = "Month_Year")
+
+(cost1)
+```
+
+```{r , echo = FALSE, warning=FALSE}
+fuel = my_cd %>% mutate(Gallons_Fuel_Session = ifelse(Aircraft == "C-172", 8.4*Duration,
+                                                         	ifelse(Aircraft == "C-152", 6.1*Duration, 5.6*Duration))) %>%
+  mutate(Price_Fuel_Session = Gallons_Fuel_Session*(0.01/0.2199692)) %>%
+  filter(Year >= 2018) %>%
+  mutate( Month_Year = str_c(Year, Month, sep = " - ")) %>%
+  group_by(Month_Year, Aircraft) %>%
+  summarize(total_monthly_fuel = sum(Price_Fuel_Session))
+(fuel)
+```
+
+
+```{r}
+cost2 = cost1 %>%
+  inner_join(fuel, by = "Month_Year")
+(cost2)
+```
+
+```{r}
+monthly_profit = cost2 %>%
+  mutate(profit = total_revenue_per_month - instructor_cost_per_month - total_monthly_fuel) %>%
+  filter(Aircraft.x == Aircraft.y) %>%
+  group_by(Month_Year, Aircraft.x) %>%
+  ggplot(aes(x = factor(Month_Year), y = profit, fill = Aircraft.x)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Year_Month vs Monthly Profit") + ylab("Monthly Profit ($CAD)") + xlab("Year - Month")
+
+(monthly_profit)
+```
+

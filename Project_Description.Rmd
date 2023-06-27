@@ -1,0 +1,73 @@
+---
+title: "STAA57 W21 Project Description"
+output:
+  pdf_document:
+    df_print: paged
+urlcolor: blue
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Project Client 
+
+Our client is [Durham Flight Center](https://durhamflightcentre.com/) (DFC), a flight training unit registered with Transport Canada and operating out of Oshawa Executive Airport (ICAO: CYOO). DFC offers training for Private/Commercial Pilot Licences (PPL/CPL) and they have provided us with data on their training sessions.
+
+
+### Project Data
+
+The data consist of several years' worth of training records, including:   
+
+- Instructor & Student ID
+- Date and Duration of training session
+- Type of equipement (aircraft type/simulator)
+- Type of session (local/cross-country, solo/dual flight)
+- Exercises completed (set of exercises performed)
+
+
+### Project Question
+
+Your goal for the  course project is to:
+
+> *Discover interesting patterns in the data and suggest ways to improve training*
+
+This is a purposefully open-ended question which you can be approached in different ways. Note that you are not required to look at it from every possible angle,  you should rather focus on one or more *specific aspects* of the question that can be addressed with the help of data. For example, you can try to identify factors for successful/complete training, training patterns that can help in scheduling, or forecast future training demand. More generally, you can look for interesting spatial, temporal, or other types of patterns in the data that can suggest improvements.
+
+
+### Additional Data Sources
+The provided data can be complemented with additional information to address various aspects of the project. To answer specific questions, you might have to locate and make use of additional data. There are several open data sources available to you, such as:  
+
+-  [Aircraft movements, by civil and military movements, airports with NAV CANADA towers, monthly](https://open.canada.ca/data/en/dataset/b91772ed-edae-4fd4-8b80-a3e4c1d29976) 
+- [Canadian airports served by NAV CANADA control towers or flight service station](https://open.canada.ca/data/en/dataset/3a1eb6ef-6054-4f9d-b1f6-c30322cd7abf)
+-  [Civil Aircraft Register Database](https://open.canada.ca/data/en/dataset/935cf4d3-7e8d-4e9b-8dfd-c02643d4f782)
+-  [Cost of Parts, Repair, and Overhaul per Hour of Flight on Selected Aircraft 2006-2016](https://open.canada.ca/data/en/dataset/deb7066b-c94b-4f65-a4e3-6b99ff47a3e0)  
+
+Note: You can read up on these and other data sources to  identify the types of information that is available and come up with meaningful ways to use it. 
+
+
+### Milestones
+There are three milestones and associated deliverables for the project: a proposal, a draft, and a final report & presentation. 
+You will be provided with templates and assessment rubrics for each deliverable. 
+
+#####	Proposal
+The proposal must specify the selected research questions and data used to answer them, outline your analysis plan, and provide a preliminary exploration of the data. The purpose of the proposal is to ensure that you have thought about the problem, identified the questions you want to address, and assessed the feasibility of your approach. Moreover, it is an opportunity to received feedback and guidance on the project. The proposal will be a short document (up to 5 pages) *due on Friday February 19*, and is worth 20\% of the project marks.
+
+
+##### Draft Report
+The draft report should contain the bulk of your analysis, and it must clearly describe your approach, results, and conclusions.  Again, the main purpose is to make sure you are on track and you have an opportunity to receive feedback and make improvements before the final report.    
+The draft will be a technical report (no more than 10 pages) *due on March 26*, and is worth 20\% of the project marks.
+
+
+##### Final Report & Presentation 
+The last deliverables are the final version of your report and a 5-minute pitch (up to 5 slides) that you will deliver to our client. You will also have to submit the full code that  reproduces your results. 
+The final report & presentation are *due on April 9*, and is worth 60\% of the project marks.
+
+
+### Teamwork
+The project will be completed in randomly assigned teams of up to 4 students. There will be a survey at the end of the project, where each student will evaluate their teammates and assess their contribution. The final project marks for each student will be determined by the team project marks, adjusted by an individual contribution factor based on the survey. 
+
+#### Acknowledgement
+Many thanks to Rob Thomson, Dispatch Manager at DFC, for providing the project data.
